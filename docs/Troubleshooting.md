@@ -132,3 +132,34 @@ Planned checks:
 * Validate kernel modules
 * Confirm required sysctl settings
 * Provide actionable remediation instructions
+
+## Kubernetes Swap Configuration
+
+### Issue
+
+Kubernetes nodes should run with swap disabled. Raspberry Pi Debian installations commonly use `dphys-swapfile` to manage swap.
+
+### Check swap status
+
+```bash
+swapon --show
+
+Resolution
+
+Disable the Raspberry Pi swap service:
+
+sudo dphys-swapfile swapoff
+sudo systemctl disable dphys-swapfile
+sudo systemctl stop dphys-swapfile
+Validation
+
+Confirm swap is disabled:
+
+free -h
+
+Expected:
+
+Swap: 0B
+Reason
+
+Kubernetes relies on Linux cgroups for resource management. Disabling swap ensures predictable pod memory scheduling and avoids kubelet resource management conflicts.
