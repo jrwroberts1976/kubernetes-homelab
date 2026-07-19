@@ -4,16 +4,16 @@
 
 This document describes the deployment process for the Kubernetes homelab platform.
 
-The cluster is built using **k3s** running on Raspberry Pi hardware and is designed to demonstrate:
+The project builds a lightweight Kubernetes environment using **k3s** on Raspberry Pi hardware. The goal is to demonstrate practical skills in:
 
 * Kubernetes administration
 * Linux system configuration
 * Infrastructure automation
-* Operational troubleshooting
-* Cloud-native platform practices
+* Container orchestration
+* Platform engineering practices
 * Technical documentation
 
-The deployment process is automated using scripts stored in this repository.
+All deployment activities are automated where possible and stored in Git for repeatability.
 
 ---
 
@@ -30,12 +30,13 @@ The deployment process is automated using scripts stored in this repository.
 | Container Runtime       | containerd                     |
 | Internal IP Address     | 192.168.2.195                  |
 | Kernel Version          | 6.12.93+rpt-rpi-v8             |
+| Storage                 | 469GB NVMe                     |
 
 ---
 
-# Repository Deployment Structure
+# Repository Structure
 
-Deployment automation is stored under:
+Deployment automation is stored in:
 
 ```text
 scripts/
@@ -50,25 +51,49 @@ scripts/
 | Script                 | Purpose                                 |
 | ---------------------- | --------------------------------------- |
 | common.sh              | Shared validation and helper functions  |
-| 01-install-packages.sh | Installs required Linux packages        |
+| 01-install-packages.sh | Installs required host packages         |
 | 02-install-k3s.sh      | Configures host and installs Kubernetes |
-| 03-install-helm.sh     | Installs Kubernetes package manager     |
+| 03-install-helm.sh     | Installs Helm package manager           |
 
 ---
 
-# Deployment Process
+# Deployment Workflow
 
-## Phase 1 - Host Preparation
+The cluster deployment follows these stages:
 
-The initial preparation script installs required utilities.
+```text
+Host Preparation
+        |
+        |
+System Validation
+        |
+        |
+Kernel Configuration
+        |
+        |
+k3s Installation
+        |
+        |
+Kubernetes Validation
+        |
+        |
+Helm Installation
+        |
+        |
+Platform Services
+```
 
-Command:
+---
+
+# Phase 1 - Host Preparation
+
+Required packages are installed using:
 
 ```bash
 ./scripts/01-install-packages.sh
 ```
 
-Installed tools include:
+Installed utilities include:
 
 * git
 * curl
@@ -77,53 +102,51 @@ Installed tools include:
 * htop
 * jq
 * unzip
-* networking utilities
+* networking tools
 * NFS utilities
-* certificate tools
+* certificate utilities
 
 ---
 
 # Kubernetes Pre-flight Validation
 
-Before installing Kubernetes, the deployment process validates the host environment.
-
-The following checks are performed:
+Before installation, the deployment scripts validate:
 
 ## Operating System
 
-The deployment currently supports:
+Supported platform:
 
 * Debian Linux
 
-## User Permissions
+## Permissions
 
-The script verifies:
+The deployment verifies:
 
-* Non-root execution
-* sudo access available
+* script execution by normal user
+* sudo availability
 
-## Network Connectivity
+## Network
 
-Internet connectivity is required to download:
+Internet access is required for:
 
-* k3s binaries
-* Helm packages
-* Kubernetes components
+* downloading k3s
+* downloading Helm
+* retrieving Kubernetes packages
 
-## Kernel Modules
+---
 
-Required Kubernetes modules:
+# Kernel Configuration
+
+Kubernetes networking requires additional Linux kernel modules.
+
+Enabled modules:
 
 ```text
 overlay
 br_netfilter
 ```
 
-are enabled automatically.
-
-## Kernel Networking Configuration
-
-The following sysctl settings are configured:
+Configured networking parameters:
 
 ```text
 net.bridge.bridge-nf-call-iptables=1
@@ -137,23 +160,17 @@ net.ipv4.ip_forward=1
 
 ## Requirement
 
-Kubernetes requires swap to be disabled for predictable resource management.
+Kubernetes requires swap to be disabled.
 
-Check current swap:
-
-```bash
-swapon --show
-```
-
-## Raspberry Pi Configuration
-
-The Raspberry Pi Debian installation uses:
+Swap was initially enabled through:
 
 ```text
 dphys-swapfile
 ```
 
-Swap was disabled using:
+## Disable Swap
+
+Commands used:
 
 ```bash
 sudo dphys-swapfile swapoff
@@ -166,13 +183,30 @@ sudo systemctl stop dphys-swapfile
 Validation:
 
 ```bash
-free -h
+swapon --show
 ```
 
 Expected:
 
 ```text
-Swap: 0B
+(no output)
+```
+
+Resource validation:
+
+```bash
+free -h
+```
+
+Current state:
+
+```text
+Memory:
+7.8Gi total
+6.0Gi available
+
+Swap:
+disabled
 ```
 
 ---
@@ -181,7 +215,7 @@ Swap: 0B
 
 ## Issue
 
-The first k3s installation attempt failed with:
+The first k3s installation attempt failed:
 
 ```text
 Error: failed to find memory cgroup (v2)
@@ -196,7 +230,7 @@ Kubernetes requires Linux cgroup controllers for:
 * resource quotas
 * pod isolation
 
-The Raspberry Pi Debian configuration did not enable memory cgroups by default.
+The Raspberry Pi boot configuration did not enable memory cgroups.
 
 ---
 
@@ -214,7 +248,7 @@ Added:
 cgroup_memory=1 cgroup_enable=memory
 ```
 
-The configuration was applied and the Raspberry Pi was rebooted.
+After reboot, k3s started successfully.
 
 Validation:
 
@@ -224,26 +258,26 @@ cat /proc/cgroups | grep memory
 
 ---
 
-# k3s Installation
+# Phase 2 - k3s Installation
 
-The Kubernetes installation is automated using:
+The Kubernetes cluster is installed using:
 
 ```bash
 ./scripts/02-install-k3s.sh
 ```
 
-The installation performs:
+The script performs:
 
 * system validation
 * kernel configuration
-* Kubernetes networking setup
+* Kubernetes networking preparation
 * k3s installation
 * systemd service configuration
 * cluster validation
 
 ---
 
-# Cluster Validation
+# Kubernetes Cluster Validation
 
 ## Node Status
 
@@ -256,13 +290,13 @@ kubectl get nodes
 Result:
 
 ```text
-NAME          STATUS   ROLES           AGE   VERSION
-k3s-node-01   Ready    control-plane   29m   v1.36.2+k3s1
+NAME          STATUS   ROLES
+k3s-node-01   Ready    control-plane
 ```
 
 ---
 
-## Detailed Node Information
+## Node Details
 
 Command:
 
@@ -280,79 +314,81 @@ k3s-node-01   Ready    control-plane   192.168.2.195
 Additional information:
 
 ```text
-OS:
-Debian GNU/Linux 12 (bookworm)
+Operating System:
+Debian GNU/Linux 12 (Bookworm)
 
 Kernel:
 6.12.93+rpt-rpi-v8
 
-Runtime:
+Container Runtime:
 containerd://2.3.2-k3s2
 ```
 
 ---
 
-# Kubernetes System Components
+# Default Kubernetes Components
 
-Command:
+The default k3s deployment includes:
+
+| Component              | Purpose                 |
+| ---------------------- | ----------------------- |
+| CoreDNS                | Kubernetes internal DNS |
+| Traefik                | Ingress controller      |
+| Metrics Server         | Resource monitoring     |
+| Local Path Provisioner | Persistent storage      |
+| Service Load Balancer  | Service exposure        |
+
+Validation:
 
 ```bash
 kubectl get pods -A
 ```
 
-Installed components:
-
-| Component              | Purpose                 |
-| ---------------------- | ----------------------- |
-| CoreDNS                | Internal Kubernetes DNS |
-| Traefik                | Ingress controller      |
-| Metrics Server         | Resource metrics        |
-| Local Path Provisioner | Persistent storage      |
-| Service Load Balancer  | Service exposure        |
-
 ---
 
-# Kubernetes User Access
+# Kubernetes User Access Configuration
 
 ## Objective
 
-Enable Kubernetes administration without requiring root privileges.
+Configure Kubernetes administration without root access.
 
-The default k3s configuration is stored at:
+The default k3s kubeconfig:
 
 ```text
 /etc/rancher/k3s/k3s.yaml
 ```
 
+was copied into the user's Kubernetes configuration directory.
+
 ---
 
-## User Configuration
+## Configuration
 
-Created kubeconfig directory:
+Create kubeconfig directory:
 
 ```bash
 mkdir -p ~/.kube
 ```
 
-Copied configuration:
+Copy configuration:
 
 ```bash
 sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 ```
 
-Updated ownership:
+Update ownership:
 
 ```bash
 sudo chown james:james ~/.kube/config
 ```
 
-Restricted permissions:
+Secure permissions:
 
 ```bash
 chmod 600 ~/.kube/config
 ```
 
-Configured environment:
+Configure environment:
 
 ```bash
 export KUBECONFIG=$HOME/.kube/config
@@ -362,7 +398,7 @@ export KUBECONFIG=$HOME/.kube/config
 
 ## Validation
 
-Kubernetes administration now works without sudo:
+Kubernetes administration works without sudo:
 
 ```bash
 kubectl get nodes
@@ -376,38 +412,90 @@ kubectl auth whoami
 
 ---
 
-# Current Cluster State
+# Phase 3 - Helm Installation
 
-The cluster currently operates as:
+## Purpose
 
-```text
-Single Node Kubernetes Cluster
+Helm is used as the Kubernetes package manager.
 
-             Home Network
-                  |
-                  |
-            k3s-node-01
-                  |
-        Kubernetes Control Plane
-                  |
-     ----------------------------
-     |          |              |
-   CoreDNS   Traefik    Metrics Server
-                  |
-        Local Persistent Storage
+Helm provides:
+
+* repeatable deployments
+* version controlled releases
+* simplified application lifecycle management
+
+---
+
+## Installation
+
+Helm is installed using:
+
+```bash
+./scripts/03-install-helm.sh
 ```
 
 ---
 
-# Resource Availability
+## Validation
 
-Initial platform sizing:
+Check Helm installation:
+
+```bash
+helm version
+```
+
+List installed releases:
+
+```bash
+helm list -A
+```
+
+---
+
+# Current Cluster State
+
+Current architecture:
+
+```text
+                 Home Network
+
+                      |
+                      |
+
+              k3s-node-01
+              192.168.2.195
+
+                      |
+
+          Kubernetes Control Plane
+
+                      |
+
+       ------------------------------
+
+       |            |              |
+
+    CoreDNS      Traefik     Metrics Server
+
+                      |
+
+          Local Persistent Storage
+```
+
+---
+
+# Resource Capacity
+
+Current host capacity:
 
 ## Memory
 
 ```text
-Total:      7.8Gi
-Available: 6.0Gi
+Total:
+7.8Gi
+
+Available:
+6.0Gi
 ```
 
 ## Storage
@@ -420,10 +508,10 @@ Available:
 212GB
 ```
 
-The available resources support future deployment of:
+The hardware is suitable for running:
 
-* monitoring
-* logging
+* monitoring stack
+* logging stack
 * GitOps tooling
 * application workloads
 
@@ -431,69 +519,90 @@ The available resources support future deployment of:
 
 # Future Platform Enhancements
 
-## Package Management
+## Kubernetes Networking
 
-* Install Helm
-* Create Helm repositories
-* Manage platform components
+Planned:
 
-## Networking
+* MetalLB load balancer
+* service IP management
+* ingress improvements
 
-* Deploy MetalLB
-* Configure load balancing
-* Improve ingress management
+---
 
-## Observability
+## Monitoring
 
 Deploy:
 
 * Prometheus
 * Grafana
+
+Capabilities:
+
+* cluster metrics
+* dashboards
+* alerting
+
+---
+
+## Logging
+
+Deploy:
+
 * Loki
+* Promtail
+
+Capabilities:
+
+* centralised logs
+* troubleshooting
+* observability
+
+---
 
 ## GitOps
 
 Deploy:
 
-* Argo CD
-* Git-managed application lifecycle
+* ArgoCD
+
+Capabilities:
+
+* Git-based deployments
+* automated synchronisation
+* application lifecycle management
+
+---
 
 ## Security
 
-Implement:
+Planned:
 
 * RBAC policies
-* Network policies
-* Secrets management
-* Security scanning
-
-## Operations
-
-Add:
-
-* Backup procedures
-* Disaster recovery documentation
-* Upgrade procedures
-* Automated health checks
+* network policies
+* secrets management
+* security scanning
 
 ---
 
 # Lessons Learned
 
-## Raspberry Pi Kubernetes Requirements
+## Kubernetes on Raspberry Pi
 
-* Kubernetes has dependencies on Linux kernel features.
-* Raspberry Pi deployments require additional boot configuration.
-* Resource validation should happen before installation.
+Key considerations:
 
-## Automation Improvements
+* Linux kernel configuration is critical
+* Memory cgroups must be enabled
+* Swap should be disabled
+* Automation prevents configuration drift
 
-The deployment process evolved from a manual installation into a repeatable platform build process with:
+## Infrastructure Automation
 
+The project evolved from manual installation into a repeatable platform deployment process using:
+
+* Bash automation
+* Git version control
+* documented procedures
 * validation checks
-* documented fixes
-* automated configuration
-* version-controlled deployment steps
 
 ---
 
@@ -511,10 +620,10 @@ Check workloads:
 kubectl get pods -A
 ```
 
-Cluster information:
+Cluster health:
 
 ```bash
-kubectl cluster-info
+kubectl get --raw='/readyz?verbose'
 ```
 
 Resource usage:
@@ -523,8 +632,8 @@ Resource usage:
 kubectl top nodes
 ```
 
-Cluster configuration:
+Helm releases:
 
 ```bash
-kubectl config view
+helm list -A
 ```
