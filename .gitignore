@@ -1,0 +1,25 @@
+# Kubernetes
+.kube/
+*.yaml.bak
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+
+# Secrets
+*.secret
+.env
+secrets/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
