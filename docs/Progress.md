@@ -1,88 +1,101 @@
-# Kubernetes Homelab Project Progress
+# Kubernetes Homelab - Project Progress
 
-## Project Overview
+## Overview
 
-This project builds a production-style Kubernetes platform in a homelab environment to demonstrate practical skills in:
+This document tracks the current implementation status of the Kubernetes Homelab platform.
 
-* Kubernetes administration
-* Linux system configuration
-* Container orchestration
-* Infrastructure automation
-* Networking
-* Documentation
-* Git-based deployment workflows
+The project has evolved from a single Raspberry Pi Linux host into a functioning Kubernetes platform designed to demonstrate cloud-native administration, DevOps practices, automation, and platform engineering skills.
 
-The platform is currently deployed as a single-node k3s cluster running on Raspberry Pi hardware.
+The goal is to build a production-style environment while documenting design decisions, troubleshooting, operational processes, and lessons learned.
 
 ---
 
-# Deployment Timeline
+# Current Status
 
-## 2026-07-19 - Kubernetes Host Preparation
+## Phase 1 - Project Foundation ✅ Complete
 
-Prepared the Raspberry Pi Kubernetes host:
+Completed:
 
-**Node:**
+* GitHub repository created
+* Repository structure defined
+* Documentation framework created
+* Project objectives documented
+* Deployment approach planned
+* Automation scripts created
 
-* Hostname: `k3s-node-01`
-* OS: Debian GNU/Linux 12 (Bookworm)
-* Architecture: ARM64
-* IP Address: `192.168.2.195`
-
-Validated system requirements:
-
-* Updated operating system packages
-* Installed required administration tools:
-
-  * git
-  * curl
-  * wget
-  * jq
-  * unzip
-  * net-tools
-  * dnsutils
-  * nfs-common
-  * ca-certificates
-  * gnupg
-  * vim
-
-Created project structure:
+Repository areas:
 
 ```
-kubernetes-homelab/
-├── docs/
-├── scripts/
-├── kubernetes/
-├── applications/
-└── README.md
-```
-
----
-
-# Installation Automation
-
-Created reusable installation scripts stored in Git:
-
-```
+docs/
 scripts/
-├── common.sh
-└── 02-install-k3s.sh
+applications/
+cluster/
+gitops/
+infrastructure/
+diagrams/
+screenshots/
 ```
-
-The scripts provide:
-
-* Logging
-* Error handling
-* Environment validation
-* Repeatable deployment steps
 
 ---
 
-# k3s Installation
+# Phase 2 - Kubernetes Host Preparation ✅ Complete
 
-Installed k3s Kubernetes distribution.
+Platform:
 
-Initial installation issue:
+| Component               | Details                        |
+| ----------------------- | ------------------------------ |
+| Hardware                | Raspberry Pi ARM64             |
+| Operating System        | Debian GNU/Linux 12 (Bookworm) |
+| Architecture            | ARM64                          |
+| Container Runtime       | containerd                     |
+| Kubernetes Distribution | k3s                            |
+
+Completed:
+
+* Base operating system prepared
+* Required packages installed
+* Kernel modules configured
+* Kubernetes networking prerequisites configured
+* Swap configuration reviewed
+* System validation automated
+
+---
+
+# Phase 3 - k3s Kubernetes Deployment ✅ Complete
+
+A single-node k3s Kubernetes cluster has been deployed.
+
+Current cluster:
+
+| Component              | Status    |
+| ---------------------- | --------- |
+| k3s Control Plane      | Running   |
+| Kubernetes API         | Available |
+| containerd             | Running   |
+| CoreDNS                | Running   |
+| Metrics Server         | Running   |
+| Local Path Provisioner | Running   |
+
+Validation:
+
+```bash
+kubectl get nodes
+kubectl get pods -A
+```
+
+Result:
+
+* Node status: Ready
+* Control plane operational
+* Core Kubernetes services healthy
+
+---
+
+# Phase 4 - Troubleshooting and Platform Hardening ✅ Complete
+
+During deployment, the cluster encountered a Raspberry Pi specific cgroup configuration issue.
+
+Problem:
 
 ```
 Error: failed to find memory cgroup (v2)
@@ -90,171 +103,224 @@ Error: failed to find memory cgroup (v2)
 
 Resolution:
 
-Updated the k3s systemd service configuration to enable required cgroup support.
+* Investigated systemd and kernel configuration
+* Updated k3s service configuration
+* Restarted Kubernetes services
+* Validated successful cluster operation
 
-Commands used:
+The troubleshooting process has been documented as part of the project learning record.
 
+---
+
+# Phase 5 - Kubernetes Networking Platform ✅ Complete
+
+Implemented:
+
+## Traefik Ingress
+
+Purpose:
+
+* External HTTP/HTTPS routing
+* Kubernetes ingress management
+
+Status:
+
+✅ Running
+
+---
+
+## MetalLB LoadBalancer
+
+Purpose:
+
+* Provide LoadBalancer functionality on bare-metal Kubernetes
+
+Status:
+
+✅ Installed using Helm
+✅ Configured with local network address pool
+
+A network conflict was identified during configuration where an existing Raspberry Pi was using an assigned address.
+
+Resolution:
+
+* Investigated active network addresses
+* Identified conflict
+* Updated MetalLB address allocation
+* Validated external service access
+
+---
+
+# Phase 6 - Application Deployment Platform ✅ Complete
+
+First Kubernetes application deployed:
+
+## Whoami Application
+
+Deployment method:
+
+* Kubernetes manifests
+* Kustomize configuration
+
+Implemented resources:
+
+| Resource   | Status   |
+| ---------- | -------- |
+| Namespace  | Complete |
+| Deployment | Complete |
+| ReplicaSet | Complete |
+| Pods       | Running  |
+| Service    | Complete |
+| Ingress    | Complete |
+
+Application validation:
+
+```bash
+kubectl get all -n demo
 ```
-sudo systemctl edit k3s
-sudo systemctl daemon-reload
-sudo systemctl restart k3s
-```
+
+Result:
+
+* Multiple replicas running
+* Service available internally
+* External ingress routing configured
+
+---
+
+# Phase 7 - Helm Package Management ✅ Complete
+
+Helm installed and operational.
+
+Current Helm-managed components:
+
+| Release     | Namespace      | Purpose                     |
+| ----------- | -------------- | --------------------------- |
+| Traefik     | kube-system    | Ingress Controller          |
+| Traefik CRD | kube-system    | Kubernetes Custom Resources |
+| MetalLB     | metallb-system | LoadBalancer Networking     |
 
 Validation:
 
-```
-kubectl get nodes
+```bash
+helm list -A
 ```
 
-Result:
+Helm provides the foundation for future application packaging and GitOps workflows.
+
+---
+
+# Current Platform Architecture
+
+Current environment:
 
 ```
-NAME          STATUS   ROLES
-k3s-node-01   Ready    control-plane
+                 GitHub Repository
+                       |
+                       |
+              Kubernetes Manifests
+                       |
+                       |
+              Raspberry Pi k3s Node
+                       |
+        --------------------------------
+        |              |               |
+     Traefik        MetalLB       containerd
+        |
+        |
+   Kubernetes Applications
+        |
+     whoami demo app
 ```
 
 ---
 
-# Cluster Validation
+# Skills Demonstrated
 
-Verified Kubernetes system components:
+This project currently demonstrates:
 
-```
-kubectl get pods -A
-```
-
-Running components:
-
-* CoreDNS
-* Metrics Server
-* Traefik Ingress Controller
-* Local Path Storage Provider
-
-Validated non-root Kubernetes administration by configuring user kubeconfig access.
-
----
-
-# System Resource Review
-
-Reviewed available resources:
-
-```
-free -h
-```
-
-Result:
-
-* Memory: 7.8GiB
-* Available memory: approximately 6GiB
-* Swap: disabled for Kubernetes compatibility
-
-Storage:
-
-```
-df -h /
-```
-
-Result:
-
-* Disk capacity: 469GB
-* Available space: 212GB
+* Linux administration
+* Debian system management
+* Kubernetes administration
+* k3s deployment
+* Container orchestration
+* Kubernetes networking
+* Ingress management
+* LoadBalancer configuration
+* Helm package management
+* Kustomize deployments
+* Git version control
+* Infrastructure documentation
+* Troubleshooting and incident resolution
 
 ---
 
-# MetalLB Installation
+# Next Planned Phases
 
-Installed MetalLB to provide LoadBalancer functionality for the bare-metal Kubernetes environment.
+## Phase 8 - GitOps Deployment
 
-Reason:
+Planned:
 
-Cloud Kubernetes platforms automatically provide external load balancers. In a homelab environment MetalLB provides equivalent functionality.
-
----
-
-# MetalLB Network Design Decision
-
-Initial MetalLB address allocation conflicted with an existing Raspberry Pi:
-
-```
-192.168.2.220
-```
-
-The network was checked before assigning service addresses.
-
-Validated available addresses:
-
-```
-192.168.2.210-192.168.2.217
-```
-
-Selected MetalLB pool:
-
-```
-192.168.2.210-192.168.2.217
-```
-
-This range was chosen to avoid conflicts with existing infrastructure.
+* ArgoCD deployment
+* Git-driven application lifecycle management
+* Automated synchronisation from GitHub
 
 ---
 
-# Traefik LoadBalancer Validation
+## Phase 9 - Observability Platform
 
-Updated Traefik to use MetalLB.
+Planned:
 
-Current service:
-
-```
-kubectl get svc -n kube-system traefik
-```
-
-Result:
-
-```
-NAME      TYPE           CLUSTER-IP      EXTERNAL-IP
-traefik   LoadBalancer   10.43.192.212   192.168.2.210
-```
-
-Validation successful.
-
-Traffic flow:
-
-```
-LAN Client
-    |
-    |
-192.168.2.210
-    |
-    |
-Traefik Ingress Controller
-    |
-    |
-Kubernetes Service
-    |
-    |
-Application Pod
-```
+* Prometheus monitoring
+* Grafana dashboards
+* Loki logging
+* Alerting workflows
 
 ---
 
-# Current Platform Status
+## Phase 10 - Security Improvements
 
-Completed:
+Planned:
 
-✅ Kubernetes host preparation
-✅ Automated k3s installation
-✅ Cluster initialisation
-✅ User Kubernetes administration
-✅ Resource validation
-✅ MetalLB installation
-✅ LoadBalancer networking
-✅ Git documentation workflow
+* RBAC implementation
+* Network policies
+* Secrets management
+* Security scanning
+* Pod security standards
 
-Next planned activities:
+---
 
-1. Deploy sample application
-2. Configure Kubernetes manifests
-3. Add Helm-based deployments
-4. Add persistent storage examples
-5. Deploy monitoring stack
-6. Introduce GitOps workflow using ArgoCD
-7. Add security and backup documentation
+## Phase 11 - Production Operations
+
+Planned:
+
+* Backup procedures
+* Disaster recovery testing
+* Cluster upgrade process
+* Operational runbooks
+
+---
+
+# Project Goal
+
+The final objective is to demonstrate the complete lifecycle of a modern Kubernetes platform:
+
+```
+Infrastructure
+      |
+      v
+Automation
+      |
+      v
+Kubernetes Platform
+      |
+      v
+Applications
+      |
+      v
+GitOps
+      |
+      v
+Monitoring & Operations
+```
+
+This repository represents a practical cloud-native engineering portfolio project demonstrating real deployment, troubleshooting, automation, and operational skills.
