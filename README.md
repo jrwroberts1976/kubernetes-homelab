@@ -70,15 +70,11 @@ screenshots/
 
 ## Documentation
 
-| Document        | Purpose                                   |
-| --------------- | ----------------------------------------- |
-| Architecture    | Overall cluster design and topology       |
-| Deployment      | Installation and configuration procedures |
-| Operations      | Day-to-day administration tasks           |
-| Security        | Security controls and hardening           |
-| Troubleshooting | Common issues and resolutions             |
-| Decisions       | Design decisions and rationale            |
-| Lessons Learned | Improvements and retrospective notes      |
+- [Architecture](docs/Architecture.md)
+- [Deployment Guide](docs/Deployment.md)
+- [Project Inventory](docs/ProjectInventory.md)
+- [Technical Decisions](docs/Decisions.md)
+- [Progress](docs/Progress.md)
 
 ---
 
