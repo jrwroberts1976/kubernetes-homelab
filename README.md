@@ -2,34 +2,41 @@
 
 > A production-style Kubernetes homelab built to develop and demonstrate cloud-native engineering, DevOps, and platform engineering skills.
 
-## Overview
+---
+
+# Overview
 
 This repository documents the design, deployment, operation and ongoing development of a Kubernetes cluster running on Raspberry Pi hardware.
 
 The project is intended to simulate many of the technologies and operational practices used in modern production environments while remaining practical to build and maintain as a personal homelab.
 
-Rather than simply deploying Kubernetes, the goal is to demonstrate the complete lifecycle of a platform, including planning, automation, monitoring, security, documentation and operational procedures.
+Rather than simply deploying Kubernetes, the goal is to demonstrate the complete lifecycle of a platform, including:
+
+* Planning
+* Automation
+* Deployment
+* Networking
+* Monitoring
+* Security
+* Documentation
+* Operational procedures
 
 ---
-## Project Journey
 
-See the full build story:
-[Project Timeline](docs/ProjectTimeline.md)
+# Project Objectives
 
-## Project Objectives
-
-* Design and deploy a highly available Kubernetes environment
+* Design and deploy a Kubernetes environment
 * Develop practical Kubernetes administration skills
-* Build experience with Infrastructure as Code and automation
-* Implement GitOps deployment workflows
+* Build experience with automation and infrastructure management
+* Implement Git-based deployment workflows
 * Configure monitoring and observability
 * Improve Linux system administration skills
 * Demonstrate production-style operational documentation
-* Create a portfolio project to support Cloud and DevOps engineering roles
+* Create a portfolio project to support Cloud, DevOps and Platform Engineering roles
 
 ---
 
-## Planned Technologies
+# Planned Technologies
 
 | Area                   | Technology             |
 | ---------------------- | ---------------------- |
@@ -37,99 +44,147 @@ See the full build story:
 | Kubernetes             | k3s                    |
 | Container Runtime      | containerd             |
 | Version Control        | Git & GitHub           |
-| Automation             | Ansible                |
+| Automation             | Bash / Ansible         |
 | Infrastructure as Code | Terraform              |
 | Monitoring             | Prometheus             |
 | Dashboards             | Grafana                |
 | Logging                | Loki                   |
-| GitOps                 | Argo CD                |
-| Networking             | MetalLB, Ingress NGINX |
+| GitOps                 | ArgoCD                 |
+| Networking             | MetalLB + Traefik      |
 | Storage                | Persistent Volumes     |
 | Security               | RBAC, Network Policies |
 
 ---
 
-## Repository Structure
+# Repository Structure
 
 ```text
-docs/
-├── Architecture.md
-├── Deployment.md
-├── Operations.md
-├── Security.md
-├── Troubleshooting.md
-├── Decisions.md
-└── Lessons-Learned.md
+kubernetes-homelab/
 
-cluster/
-applications/
-gitops/
-infrastructure/
-scripts/
-diagrams/
-screenshots/
+├── applications/
+│   └── whoami/
+│       ├── deployment.yaml
+│       ├── service.yaml
+│       ├── ingress.yaml
+│       └── kustomization.yaml
+│
+├── docs/
+│   ├── Architecture.md
+│   ├── Deployment.md
+│   ├── Decisions.md
+│   ├── ProjectInventory.md
+│   ├── ProjectTimeline.md
+│   └── Progress.md
+│
+├── images/
+│
+├── kubernetes/
+│   ├── metallb/
+│   └── namespaces/
+│
+├── scripts/
+│   ├── common.sh
+│   └── 02-install-k3s.sh
+│
+└── README.md
 ```
 
 ---
 
-## Documentation
+# Documentation
 
-- [Architecture](docs/Architecture.md)
-- [Deployment Guide](docs/Deployment.md)
-- [Project Inventory](docs/ProjectInventory.md)
-- [Technical Decisions](docs/Decisions.md)
-- [Progress](docs/Progress.md)
+* [Architecture](docs/Architecture.md)
+* [Deployment Guide](docs/Deployment.md)
+* [Project Inventory](docs/ProjectInventory.md)
+* [Project Timeline](docs/ProjectTimeline.md)
+* [Technical Decisions](docs/Decisions.md)
+* [Progress](docs/Progress.md)
 
 ---
 
-## Current Status
+# Current Status
 
-**Phase 1 – Project Planning**
+## Phase 7 – Kubernetes Application Platform Operational
+
+The Kubernetes platform is now deployed and running workloads.
+
+Completed:
 
 * [x] Repository created
 * [x] Documentation structure defined
-* [ ] Cluster hardware prepared
-* [ ] Kubernetes installed
-* [ ] Networking configured
-* [ ] Monitoring deployed
-* [ ] GitOps implemented
-* [ ] Backup and recovery procedures documented
+* [x] Raspberry Pi Kubernetes host prepared
+* [x] Debian Linux configured
+* [x] Kubernetes prerequisites configured
+* [x] k3s Kubernetes cluster deployed
+* [x] Control-plane node operational
+* [x] Kubernetes core services validated
+* [x] MetalLB LoadBalancer configured
+* [x] Traefik ingress deployed
+* [x] First Kubernetes application deployed
+* [x] Kustomize deployment workflow implemented
+* [x] Deployment documentation created
 
 ---
 
-## Skills Demonstrated
+# Current Platform
 
-* Linux Administration
-* Kubernetes Administration
-* Container Orchestration
-* Infrastructure as Code
-* Git Version Control
-* GitHub Workflows
-* Platform Engineering
-* DevOps Practices
-* Monitoring and Observability
-* Documentation
-* Networking
-* Troubleshooting
+| Component              | Status                      |
+| ---------------------- | --------------------------- |
+| Kubernetes             | Running                     |
+| Distribution           | k3s                         |
+| Control Plane          | Operational                 |
+| Container Runtime      | containerd                  |
+| Networking             | MetalLB + Traefik           |
+| Storage                | Local Path Provisioner      |
+| Application Deployment | Kubernetes YAML + Kustomize |
+| Documentation          | Active                      |
 
 ---
 
-## Future Enhancements
+# Kubernetes Cluster
 
-* Multi-node Kubernetes cluster
-* High Availability control plane
-* Automated cluster provisioning
-* Certificate management
-* Secrets management
-* CI/CD pipelines
-* Application deployments
-* Backup and disaster recovery
-* Cluster upgrades
-* Security scanning
+Current cluster:
+
+| Component          | Details            |
+| ------------------ | ------------------ |
+| Host               | Raspberry Pi ARM64 |
+| Node Name          | k3s-node-01        |
+| Operating System   | Debian 12 Bookworm |
+| Kubernetes Version | v1.36.2+k3s1       |
+| Runtime            | containerd         |
+| Node Role          | Control Plane      |
 
 ---
 
-## Project Journey
+# Deployed Applications
+
+## whoami
+
+A lightweight Kubernetes demonstration application used to validate application deployment workflows.
+
+Implemented resources:
+
+* Namespace
+* Deployment
+* ReplicaSet
+* Pods
+* Service
+* Ingress
+* Kustomize configuration
+
+Current deployment:
+
+| Resource  | Status    |
+| --------- | --------- |
+| Namespace | demo      |
+| Replicas  | 2         |
+| Pods      | Running   |
+| Service   | ClusterIP |
+| Ingress   | Traefik   |
+
+---
+
+# Project Journey
 
 This project documents the build of a Kubernetes platform from a single Raspberry Pi host into a fully operational container orchestration environment.
 
@@ -142,35 +197,22 @@ The goal is to demonstrate practical cloud-native engineering skills including:
 * Networking
 * Git-based documentation and deployment practices
 
-### Current Progress
+---
 
-✅ Repository structure created
-✅ Automated deployment scripts developed
-✅ Debian host prepared for Kubernetes
-✅ k3s Kubernetes cluster deployed
-✅ Control-plane node operational
-✅ Core Kubernetes services validated
-✅ MetalLB LoadBalancer networking configured
-✅ Traefik ingress deployed
-✅ First application deployed using Kubernetes manifests and Kustomize
+## Build Story
 
-### Current Platform
+The project started with preparing a Raspberry Pi ARM64 host and creating a repeatable deployment process.
 
-| Component              | Status                 |
-| ---------------------- | ---------------------- |
-| Kubernetes             | Running                |
-| k3s Control Plane      | Operational            |
-| Container Runtime      | containerd             |
-| Networking             | MetalLB + Traefik      |
-| Storage                | Local Path Provisioner |
-| Application Deployment | Kustomize              |
-| Documentation          | In progress            |
+The initial Kubernetes deployment required troubleshooting Linux system configuration, including:
 
-### Build Story
+* Kernel modules
+* Network forwarding
+* Linux cgroups
+* Kubernetes host requirements
 
-The project started with preparing a Raspberry Pi ARM64 host and creating a repeatable deployment process. Initial Kubernetes deployment required troubleshooting around Linux cgroups and system configuration before achieving a healthy cluster state.
+After resolving these issues, the cluster reached a healthy operational state.
 
-The platform has since progressed to running real Kubernetes workloads, including:
+The platform has progressed to running real Kubernetes workloads including:
 
 * Namespace management
 * Deployments
@@ -179,24 +221,61 @@ The platform has since progressed to running real Kubernetes workloads, includin
 * Ingress routing
 * External LoadBalancer access
 
-### Next Steps
+---
+
+# Next Steps
 
 The next phases will focus on moving the platform closer to production practices:
 
+## Platform Operations
+
+Planned:
+
 * Helm application packaging
 * GitOps deployment with ArgoCD
-* Monitoring with Prometheus and Grafana
-* Centralised logging
-* Security improvements
-* Backup and recovery testing
+* Automated application delivery
 
-For the detailed build history, see:
+## Observability
 
-[Project Timeline](docs/ProjectTimeline.md)
+Planned:
 
+* Prometheus metrics collection
+* Grafana dashboards
+* Loki centralised logging
+* Alerting
 
+## Production Practices
 
-## Purpose
+Planned:
+
+* Backup strategy
+* Disaster recovery testing
+* Security scanning
+* RBAC improvements
+* Network policies
+* Cluster upgrade procedures
+
+---
+
+# Skills Demonstrated
+
+* Linux Administration
+* Kubernetes Administration
+* Container Orchestration
+* k3s Deployment
+* containerd Runtime Management
+* Kubernetes Networking
+* LoadBalancer Configuration
+* Ingress Management
+* Git Version Control
+* GitHub Repository Management
+* Infrastructure Automation
+* Troubleshooting
+* Technical Documentation
+* Platform Engineering Practices
+
+---
+
+# Purpose
 
 This project is maintained as a practical learning platform and professional portfolio to demonstrate real-world Kubernetes administration, infrastructure automation and cloud-native operational practices.
-
