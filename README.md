@@ -11,6 +11,10 @@ The project is intended to simulate many of the technologies and operational pra
 Rather than simply deploying Kubernetes, the goal is to demonstrate the complete lifecycle of a platform, including planning, automation, monitoring, security, documentation and operational procedures.
 
 ---
+## Project Journey
+
+See the full build story:
+[Project Timeline](docs/ProjectTimeline.md)
 
 ## Project Objectives
 
@@ -124,6 +128,73 @@ screenshots/
 * Security scanning
 
 ---
+
+## Project Journey
+
+This project documents the build of a Kubernetes platform from a single Raspberry Pi host into a fully operational container orchestration environment.
+
+The goal is to demonstrate practical cloud-native engineering skills including:
+
+* Kubernetes administration
+* Container orchestration
+* Linux platform management
+* Infrastructure automation
+* Networking
+* Git-based documentation and deployment practices
+
+### Current Progress
+
+✅ Repository structure created
+✅ Automated deployment scripts developed
+✅ Debian host prepared for Kubernetes
+✅ k3s Kubernetes cluster deployed
+✅ Control-plane node operational
+✅ Core Kubernetes services validated
+✅ MetalLB LoadBalancer networking configured
+✅ Traefik ingress deployed
+✅ First application deployed using Kubernetes manifests and Kustomize
+
+### Current Platform
+
+| Component              | Status                 |
+| ---------------------- | ---------------------- |
+| Kubernetes             | Running                |
+| k3s Control Plane      | Operational            |
+| Container Runtime      | containerd             |
+| Networking             | MetalLB + Traefik      |
+| Storage                | Local Path Provisioner |
+| Application Deployment | Kustomize              |
+| Documentation          | In progress            |
+
+### Build Story
+
+The project started with preparing a Raspberry Pi ARM64 host and creating a repeatable deployment process. Initial Kubernetes deployment required troubleshooting around Linux cgroups and system configuration before achieving a healthy cluster state.
+
+The platform has since progressed to running real Kubernetes workloads, including:
+
+* Namespace management
+* Deployments
+* ReplicaSets
+* Services
+* Ingress routing
+* External LoadBalancer access
+
+### Next Steps
+
+The next phases will focus on moving the platform closer to production practices:
+
+* Helm application packaging
+* GitOps deployment with ArgoCD
+* Monitoring with Prometheus and Grafana
+* Centralised logging
+* Security improvements
+* Backup and recovery testing
+
+For the detailed build history, see:
+
+[Project Timeline](docs/ProjectTimeline.md)
+
+
 
 ## Purpose
 
